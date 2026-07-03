@@ -1,0 +1,53 @@
+######################################################################
+DEMO 1: For-loop VALID
+######################################################################
+
+SOURCE CODE:
+  for ( i = 0 ; i < 5 ; i++ ) { total = total + i }
+
+=== 1. ANALISIS LEKSIKAL (TOKEN) ===
+[<FOR:for>, <LPAREN:(>, <ID:i>, <ASSIGN:=>, <NUMBER:0>, <SEMI:;>, <ID:i>, <LT:<>, <NUMBER:5>, <SEMI:;>, <ID:i>, <INC:++>, <RPAREN:)>, <LBRACE:{>, <ID:total>, <ASSIGN:=>, <ID:total>, <PLUS:+>, <ID:i>, <RBRACE:}>, <EOF:None>]
+
+=== 2. ANALISIS SINTAKSIS (AST) ===
+ForNode(init=Assign(i = 0), cond=Cond(i < 5), update=Update(i++), body=[Assign(total = BinOp(total + i))])
+
+=== 3. ANALISIS SEMANTIK ===
+Status: VALID
+Tabel Simbol: {'total': 'int', 'i': 'int'}
+
+=== 4. THREE-ADDRESS CODE (TAC) ===
+i = 0
+L1:
+ifFalse (i < 5) goto L2
+t1 = total + i
+total = t1
+i = i + 1
+goto L1
+L2:
+
+######################################################################
+DEMO 2: For-loop dengan KESALAHAN SEMANTIK (variabel belum dideklarasikan)
+######################################################################
+
+SOURCE CODE:
+  for ( i = 0 ; i < 10 ; i = i + 1 ) { hasil = hasil + i }
+
+=== 1. ANALISIS LEKSIKAL (TOKEN) ===
+[<FOR:for>, <LPAREN:(>, <ID:i>, <ASSIGN:=>, <NUMBER:0>, <SEMI:;>, <ID:i>, <LT:<>, <NUMBER:10>, <SEMI:;>, <ID:i>, <ASSIGN:=>, <ID:i>, <PLUS:+>, <NUMBER:1>, <RPAREN:)>, <LBRACE:{>, <ID:hasil>, <ASSIGN:=>, <ID:hasil>, <PLUS:+>, <ID:i>, <RBRACE:}>, <EOF:None>]
+
+=== 2. ANALISIS SINTAKSIS (AST) ===
+ForNode(init=Assign(i = 0), cond=Cond(i < 10), update=Update(i=BinOp(i + 1)), body=[Assign(hasil = BinOp(hasil + i))])
+
+[SEMANTIC ERROR] Variabel 'hasil' digunakan sebelum dideklarasikan
+
+######################################################################
+DEMO 3: For-loop dengan KESALAHAN SINTAKSIS
+######################################################################
+
+SOURCE CODE:
+  for ( i = 0 ; i < 5 i++ ) { total = total + i }
+
+=== 1. ANALISIS LEKSIKAL (TOKEN) ===
+[<FOR:for>, <LPAREN:(>, <ID:i>, <ASSIGN:=>, <NUMBER:0>, <SEMI:;>, <ID:i>, <LT:<>, <NUMBER:5>, <ID:i>, <INC:++>, <RPAREN:)>, <LBRACE:{>, <ID:total>, <ASSIGN:=>, <ID:total>, <PLUS:+>, <ID:i>, <RBRACE:}>, <EOF:None>]
+
+[SYNTAX ERROR] Diharapkan token 'SEMI' tetapi ditemukan 'ID' (i)
